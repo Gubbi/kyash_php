@@ -1,0 +1,2 @@
+1. Capture: Take shipment details and send it via API instead of hard coded values.
+2. Cancel: Take appropriate reason for cancellation and send that via API.
