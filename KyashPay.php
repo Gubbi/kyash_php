@@ -18,6 +18,10 @@ class KyashPay {
         return $this->api_request(self::$baseUri . '/kyashcodes/', $data);
     }
 
+    public function getKyashCode($kyash_code) {
+        return $this->api_request(self::$baseUri . '/kyashcodes/' . $kyash_code);
+    }
+
     public function capture($kyash_code) {
         $url = self::$baseUri . '/kyashcodes/' . $kyash_code . '/capture';
         $params = "completion_expected_by=" . strtotime("+3 day");
@@ -48,7 +52,7 @@ class KyashPay {
             $httpd_username = filter_var($_SERVER['PHP_AUTH_USER'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_LOW);
             $httpd_password = filter_var($_SERVER['PHP_AUTH_PW'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_LOW);
 
-            if ($httpd_username !== $this->key || $httpd_password !== $this->secret) {
+            if ($httpd_username !== $this->key || $httpd_password !== $this->callback_secret) {
                 $this->log("Handler: Required credentials not found.");
                 header("HTTP/1.1 401 Unauthorized");
                 return;
@@ -121,6 +125,8 @@ class KyashPay {
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . '/cacert.pem');
         curl_setopt($curl, CURLOPT_USERPWD, $this->key . ':' . $this->secret);
         if($data) {
             curl_setopt($curl, CURLOPT_POST, 1);
