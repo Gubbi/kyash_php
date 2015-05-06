@@ -5,6 +5,7 @@ class KyashPay {
     public $key = '';
     public $secret = '';
     public $hmac = NULL;
+    public $callback_secret = NULL;
     public $logger = NULL;
 
     public function __construct($key, $secret, $callback_secret = NULL, $hmac = NULL) {
@@ -23,6 +24,7 @@ class KyashPay {
     }
 
     public function capture($kyash_code) {
+        $this->log("Capturing Kyashcode: " . $kyash_code);
         $url = self::$baseUri . '/kyashcodes/' . $kyash_code . '/capture';
         $params = "completion_expected_by=" . strtotime("+3 day");
         $params .= "&details=shipment completed";
@@ -30,6 +32,7 @@ class KyashPay {
     }
 
     public function cancel($kyash_code, $reason='requested_by_customer') {
+        $this->log("Cancelling Kyashcode: " . $kyash_code);
         $url = self::$baseUri . '/kyashcodes/' . $kyash_code . '/cancel';
         $params = "reason=".$reason;
         return $this->api_request($url, $params);
@@ -40,9 +43,11 @@ class KyashPay {
     }
 
     public function callback_handler($order, $kyash_code, $kyash_status, $req_url) {
+        $this->log('Callback handler called.');
         $scheme = parse_url($req_url, PHP_URL_SCHEME);
 
         if ($scheme === 'https') {
+            $this->log('HTTPS auth scheme');
             if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
                 $this->log("Handler: Required header values missing.");
                 header("HTTP/1.1 401 Unauthorized");
@@ -59,7 +64,9 @@ class KyashPay {
             }
         }
         else {
+            $this->log('HTTP auth scheme');
             $headers = getallheaders();
+            $this->log($headers);
             $authorization = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 
             if (empty($authorization)) {
@@ -69,8 +76,12 @@ class KyashPay {
             }
 
             $normalized_request_string = '';
+            ksort($_REQUEST);
             foreach ($_REQUEST as $key => $value) {
-                $normalized_request_string .= empty($normalized_request_string)? '' : '&';
+                if($key == 'route') {
+                    continue;
+                }
+                $normalized_request_string .= empty($normalized_request_string)? '' : '%26';
                 $normalized_request_string .= urlencode(utf8_encode($key) . '=' . utf8_encode($value));
             }
 
@@ -122,6 +133,7 @@ class KyashPay {
     }
 
     public function api_request($url, $data = NULL) {
+        $this->log('Request: ' . $url . ' => ' . $data);
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -142,7 +154,6 @@ class KyashPay {
         }
         curl_close($curl);
 
-        $this->log('Request: ' . $url . ' => ' . $data);
         $this->log('Response: ' . json_encode($response));
         return $response;
     }
