@@ -1,6 +1,14 @@
 # kyash_php
 PHP library to access the [Kyash Payment Gateway](http://www.kyash.com/) API.
 
+### Using the Library
+If you are using composer package management system, then you can just require this library in your code:
+```php
+require 'vendor/autoload.php';
+```
+
+### Sample Code
+
 ```php
 // Get the Kyash Credentials from your Kyash Account API Settings. There is a separate set of credentials for production and development environments.
 $kyash = KyashPay('public_api_id', 'api_secret', 'callback_secret', 'hmac_secret');
