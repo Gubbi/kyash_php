@@ -2,7 +2,7 @@
 PHP library to access the [Kyash Payment Gateway](http://www.kyash.com/) API.
 
 ### Usage
-Install the latest version with ```composer require kyash/kyash_php```
+Install the latest version with ```composer require kyash/api```
 
 ```php
 use Kyash\Collection;

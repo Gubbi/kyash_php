@@ -1,5 +1,5 @@
 {
-  "name": "kyash/kyash_php",
+  "name": "kyash/api",
   "type": "library",
   "description": "Integrate with the Kyash Payment Gateway.",
   "keywords": ["kyash","cash","india","payment gateway","collect cash payment"],
